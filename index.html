@@ -1,0 +1,210 @@
+<!DOCTYPE html>
+<html>
+    <head>
+        <meta name="viewport" content="width=device-width, initial-scale=1">
+        <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+        <link rel="stylesheet" href="jquery.mobile-1.4.5.min.css">
+        <script src="jquery.js"></script>
+        <script src="jquery.mobile-1.4.5.min.js"></script>
+        <style>
+            td,th{
+                border:1px solid #ddd;
+                padding:5px;
+            }
+
+            /*loading*/
+            .loader {
+                font-size: 0.2em;
+                margin: 50px auto;
+                top:47%;
+                text-indent: -9999em;
+                width: 11em;
+                height: 11em;
+                border-radius: 50%;
+                background: #ffffff;
+                background: -moz-linear-gradient(left, #ffffff 10%, rgba(255, 255, 255, 0) 42%);
+                background: -webkit-linear-gradient(left, #ffffff 10%, rgba(255, 255, 255, 0) 42%);
+                background: -o-linear-gradient(left, #ffffff 10%, rgba(255, 255, 255, 0) 42%);
+                background: -ms-linear-gradient(left, #ffffff 10%, rgba(255, 255, 255, 0) 42%);
+                background: linear-gradient(to right, #ffffff 10%, rgba(255, 255, 255, 0) 42%);
+                position: relative;
+
+                text-shadow:0px 0px 20px rgba(0,0,0, 0.4);
+
+                /*
+                -webkit-animation: load3 0.7s infinite ease;
+                animation: load3 0.7s infinite ease;
+                */
+
+                -webkit-animation: load3 0.7s infinite linear;
+                animation: load3 0.7s infinite linear;
+
+                -webkit-transform: translateZ(0);
+                -ms-transform: translateZ(0);
+                transform: translateZ(0);
+
+                opacity: 0.85;
+            }
+
+            @media screen and (-webkit-min-device-pixel-ratio:0)
+            {
+                .loader { width: 3em; height: 3em;}/*chrome微調位置*/
+            }
+
+
+
+            /* Loader 消失 */
+            div.loaderHide{
+                opacity: 0;
+                -webkit-transform: scale3d(.3, .3, .3);
+                transform: scale3d(.3, .3, .3);
+                transition: all 1s ease-in-out 0s;
+            }
+
+
+            .loader:before {
+                width: 50%;
+                height: 50%;
+                background: #ffffff;
+                border-radius: 100% 0 0 0;
+                position: absolute;
+                top: 0;
+                left: 0;
+                content: '';
+            }
+
+
+            .loader:after {
+                background: #000;
+                width: 75%;
+                height: 75%;
+                border-radius: 50%;
+                content: '';
+                margin: auto;
+                position: absolute;
+                top: 0;
+                left: 0;
+                bottom: 0;
+                right: 0;
+            }
+
+
+            @-webkit-keyframes load3 {
+                0% {
+                    -webkit-transform: rotate(0deg);
+                    transform: rotate(0deg);
+                }
+                100% {
+                    -webkit-transform: rotate(360deg);
+                    transform: rotate(360deg);
+                }
+            }
+
+
+            @keyframes load3 {
+                0% {
+                    -webkit-transform: rotate(0deg);
+                    transform: rotate(0deg);
+                }
+                100% {
+                    -webkit-transform: rotate(360deg);
+                    transform: rotate(360deg);
+                }
+            }
+
+
+            /* Loader 黑塊 (含 Loader) */
+            .loaderBlock{
+                height:100%;
+                background: #000 none repeat scroll 0 0;
+                position: fixed;
+                z-index: 9999;
+                width:100%;
+                opacity: 0.65;
+            }
+
+
+            /* Loader 黑塊--消失 (含 Loader) */
+            div.loaderBlockHide{
+                opacity: 0;
+                transition: all 1.2s ease-in-out 0s;
+            }
+
+            .center{
+                margin: 0 auto;
+
+            }
+        </style>
+    </head>
+    <body>
+        <div class="loaderBlock ie8_hide">
+            <div class="loader">Loading...</div>
+        </div>
+        <div data-role="tabs" id="tabs">
+            <div data-role="navbar" style=" margin-bottom: 20px;margin-top: 3px;">
+                <ul>
+                    <li>
+                        <a href="#one" data-ajax="false" class="ui-btn-active">貝萊德世界能源</a>
+                    </li>
+                    <li>
+                        <a href="#t" data-ajax="false">摩根中國</a>
+                    </li>
+                    <li>
+                        <a href="#thr" data-ajax="false">德盛安聯高收益債卷</a>
+                    </li>
+                </ul>
+            </div>
+            <div id="one">
+
+            </div>
+            <div id="t" >
+
+            </div>
+            <div id="thr">
+
+            </div>
+        </div>
+
+
+        <script>
+            $(function () {
+                $.ajaxPrefilter(function (options) {
+                    if (options.crossDomain && jQuery.support.cors) {
+                        var http = (window.location.protocol === 'http:' ? 'http:' : 'https:');
+                        options.url = http + '//cors-anywhere.herokuapp.com/' + options.url;
+                        //options.url = "http://cors.corsproxy.io/url=" + options.url;
+                    }
+                });
+
+
+                var targetUrl = ["https://tw.money.yahoo.com/fund/history/F0GBR04K8F:FO", "https://tw.money.yahoo.com/fund/history/F0GBR04SN7:FO", "https://tw.money.yahoo.com/fund/history/F00000OXXD:FO"];
+                $.each(targetUrl, function (index, url) {
+                    getDate(url, index);
+                });
+
+                function getDate(url, index) {
+                    $.ajax({
+                        "method": "get",
+                        "url": url,
+                        crossDomain: true,
+                        error: function (jqXHR, textStatus, errorThrown) {
+                            alert('new textStatus=' + textStatus + ' errorThrown=' + errorThrown);
+                        },
+                        success: function (response) {
+                            var data = $(response).find(".Miw-100").html();
+                            bindDate(data, index);
+                            $(".loader").addClass("loaderHide").css("z-index", "0");
+                            $(".loaderBlock").addClass("loaderBlockHide").css("z-index", "0");
+                        }
+                    });
+                }
+
+                function bindDate(data, index) {
+                    $("#tabs div").eq((index + 1)).html("<table class='center' >" + data) + "</table>";
+                    $(".Icon").remove();
+                    $(".padding-column").remove();
+                }
+            });
+        </script>
+    </body>
+</html>
